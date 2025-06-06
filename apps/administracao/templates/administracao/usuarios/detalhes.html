@@ -1,0 +1,300 @@
+{% extends 'administracao/base.html' %}
+{% load static %}
+
+{% block title %}Perfil - {{ user_detail.get_full_name_display }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Cabeçalho -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="text-success mb-0">
+                <i class="fas fa-user me-2"></i>Perfil do Usuário
+            </h2>
+            <p class="text-muted">Gerencie as informações do usuário</p>
+        </div>
+        <div class="btn-group">
+            <a href="{% url 'administracao:usuarios_lista' %}" class="btn btn-outline-success">
+                <i class="fas fa-arrow-left me-2"></i>Voltar à Lista
+            </a>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalEditarPerfil">
+                <i class="fas fa-edit me-2"></i>Editar Perfil
+            </button>
+            <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#modalAlterarSenha">
+                <i class="fas fa-key me-2"></i>Alterar Senha
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Cartão de Perfil -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <div class="position-relative mb-4 mx-auto" style="width: 150px; height: 150px;">
+                        <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" 
+                             style="width: 150px; height: 150px;">
+                            <i class="fas fa-user fa-4x"></i>
+                        </div>
+                    </div>
+                    <h4 class="mb-1">{{ user_detail.get_full_name_display }}</h4>
+                    <p class="text-muted mb-3">{{ user_detail.get_user_type_display }}</p>
+                    {% if user_detail.is_admin_user %}
+                        <span class="badge bg-success">Administrador</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Usuário Regular</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Informações Detalhadas -->
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">Informações Pessoais</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="text-muted small">Nome Completo</label>
+                            <p class="mb-3">{{ user_detail.full_name|default:"Não informado" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small">Username</label>
+                            <p class="mb-3">{{ user_detail.username }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small">Email</label>
+                            <p class="mb-3">{{ user_detail.email }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small">Número de Identificação</label>
+                            <p class="mb-3">{{ user_detail.identification_number|default:"Não informado" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small">Data de Nascimento</label>
+                            <p class="mb-3">{{ user_detail.date_of_birth|date:"d/m/Y"|default:"Não informada" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small">Tipo de Usuário</label>
+                            <p class="mb-3">{{ user_detail.get_user_type_display }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small">Data de Cadastro</label>
+                            <p class="mb-3">{{ user_detail.date_joined|date:"d/m/Y H:i" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small">Último Login</label>
+                            <p class="mb-3">{{ user_detail.last_login|date:"d/m/Y H:i"|default:"Nunca fez login" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small">Status</label>
+                            <p class="mb-3">
+                                {% if user_detail.is_active %}
+                                    <span class="badge bg-success">Ativo</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inativo</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Perfil -->
+<div class="modal fade" id="modalEditarPerfil" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar Perfil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{% comment %}{% url 'administracao:usuario_atualizar' user_detail.pk %} {% endcomment %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Nome Completo *</label>
+                                <input type="text" class="form-control" name="full_name" 
+                                       value="{{ user_detail.full_name }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Email *</label>
+                                <input type="email" class="form-control" name="email" 
+                                       value="{{ user_detail.email }}" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Número de Identificação *</label>
+                                <input type="text" class="form-control" name="identification_number" 
+                                       value="{{ user_detail.identification_number }}" required>
+                                <div class="form-text">BI, NIF, etc</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Data de Nascimento</label>
+                                <input type="date" class="form-control" name="date_of_birth" 
+                                       value="{{ user_detail.date_of_birth|date:'Y-m-d' }}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Tipo de Usuário</label>
+                                <select class="form-select" name="user_type">
+                                    {% for value, label in form.fields.user_type.choices %}
+                                        <option value="{{ value }}" {% if user_detail.user_type == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Alterar Senha -->
+<div class="modal fade" id="modalAlterarSenha" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Alterar Senha</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{% url 'administracao:usuario_alterar_senha' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Senha Atual</label>
+                        <input type="password" class="form-control" name="current_password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nova Senha</label>
+                        <input type="password" class="form-control" name="new_password" required>
+                        <div class="form-text">
+                            A senha deve ter pelo menos 8 caracteres e incluir letras e números.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Confirmar Nova Senha</label>
+                        <input type="password" class="form-control" name="confirm_password" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Alterar Senha</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scriptJS %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+
+    // Tratamento de mensagens
+    {% if messages %}
+        const messages = document.querySelectorAll('.alert');
+        messages.forEach(message => {
+            setTimeout(() => {
+                message.style.transition = 'opacity 0.5s ease';
+                message.style.opacity = '0';
+                setTimeout(() => message.remove(), 500);
+            }, 3000);
+        });
+    {% endif %}
+
+    // Limpar formulário de senha quando o modal for fechado
+    const modalSenha = document.getElementById('modalAlterarSenha');
+    if (modalSenha) {
+        modalSenha.addEventListener('hidden.bs.modal', function () {
+            const form = modalSenha.querySelector('form');
+            form.reset();
+        });
+    }
+
+    // Validação do formulário de senha
+    const formSenha = document.querySelector('#modalAlterarSenha form');
+    if (formSenha) {
+        formSenha.addEventListener('submit', function(e) {
+            const novaSenha = document.querySelector('input[name="new_password"]').value;
+            const confirmarSenha = document.querySelector('input[name="confirm_password"]').value;
+            
+            if (novaSenha !== confirmarSenha) {
+                e.preventDefault();
+                alert('As senhas não coincidem!');
+                return false;
+            }
+            
+            if (novaSenha.length < 8) {
+                e.preventDefault();
+                alert('A senha deve ter pelo menos 8 caracteres!');
+                return false;
+            }
+            
+            // Verificar se contém letras e números
+            const temLetras = /[a-zA-Z]/.test(novaSenha);
+            const temNumeros = /\d/.test(novaSenha);
+            
+            if (!temLetras || !temNumeros) {
+                e.preventDefault();
+                alert('A senha deve conter letras e números!');
+                return false;
+            }
+        });
+    }
+
+    // Validação do formulário de edição de perfil
+    const formEdicao = document.querySelector('#modalEditarPerfil form');
+    if (formEdicao) {
+        formEdicao.addEventListener('submit', function(e) {
+            const email = document.querySelector('input[name="email"]').value;
+            const fullName = document.querySelector('input[name="full_name"]').value;
+            const identificationNumber = document.querySelector('input[name="identification_number"]').value;
+            
+            // Validações básicas
+            if (!email || !fullName || !identificationNumber) {
+                e.preventDefault();
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return false;
+            }
+            
+            // Validação do email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                e.preventDefault();
+                alert('Por favor, insira um email válido.');
+                return false;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

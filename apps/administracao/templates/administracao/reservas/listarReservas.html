@@ -1,0 +1,387 @@
+{% extends 'administracao/base.html' %}
+{% load static %}
+
+{% block title %}Reservas de Ingressos{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Cabeçalho -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="text-success mb-0">
+                <i class="fas fa-ticket-alt me-2"></i>Reservas de Ingressos
+            </h2>
+            <p class="text-muted">Gerenciamento de reservas do sistema</p>
+        </div>
+        {% comment %}
+        <div class="btn-group">
+            <a href="#" class="btn btn-outline-success">
+                <i class="fas fa-file-export me-2"></i>Exportar
+            </a>
+            <a href="#" class="btn btn-success">
+                <i class="fas fa-plus me-2"></i>Nova Reserva
+            </a>
+        </div>
+        {% endcomment %}
+    </div>
+
+    <!-- Filtros e Busca -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form class="row g-3" action="{% url 'administracao:reservas_lista' %}" method="GET">
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <span class="input-group-text bg-success text-white">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            name="search"
+                            placeholder="Pesquisar reservas"
+                            value="{{ search_query }}"
+                        >
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <select name="status" class="form-select">
+                        <option value="">Todos Status</option>
+                        {% for status_key, status_label in status_choices %}
+                        <option value="{{ status_key }}" 
+                                {% if status_key == status_selected %}selected{% endif %}>
+                            {{ status_label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="user_id" class="form-select">
+                        <option value="">Todos Usuários</option>
+                        {% for usuario in usuarios %}
+                        <option value="{{ usuario.id }}" 
+                                {% if usuario.id|stringformat:"s" == user_id_selected %}selected{% endif %}>
+                            {{ usuario.get_full_name_display }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <input 
+                        type="date" 
+                        class="form-control" 
+                        name="date_from"
+                        placeholder="Data inicial"
+                        value="{{ date_from }}"
+                    >
+                </div>
+                <div class="col-md-2">
+                    <input 
+                        type="date" 
+                        class="form-control" 
+                        name="date_to"
+                        placeholder="Data final"
+                        value="{{ date_to }}"
+                    >
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="fas fa-filter"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Filtros Ativos -->
+    {% if search_query or status_selected or user_id_selected or date_from or date_to %}
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex align-items-center flex-wrap">
+                <span class="me-2 text-muted">Filtros ativos:</span>
+                
+                {% if search_query %}
+                <span class="badge bg-secondary me-2 mb-1">
+                    Busca: {{ search_query }}
+                    <a href="{% url 'administracao:reservas_lista' %}" class="text-white ms-1">
+                        <i class="fas fa-times-circle"></i>
+                    </a>
+                </span>
+                {% endif %}
+                
+                {% if status_selected %}
+                <span class="badge bg-secondary me-2 mb-1">
+                    Status: 
+                    {% for status_key, status_label in status_choices %}
+                        {% if status_key == status_selected %}{{ status_label }}{% endif %}
+                    {% endfor %}
+                    <a href="{% url 'administracao:reservas_lista' %}" class="text-white ms-1">
+                        <i class="fas fa-times-circle"></i>
+                    </a>
+                </span>
+                {% endif %}
+                
+                {% if user_id_selected %}
+                <span class="badge bg-secondary me-2 mb-1">
+                    Usuário: 
+                    {% for usuario in usuarios %}
+                        {% if usuario.id|stringformat:"s" == user_id_selected %}{{ usuario.get_full_name_display }}{% endif %}
+                    {% endfor %}
+                    <a href="{% url 'administracao:reservas_lista' %}" class="text-white ms-1">
+                        <i class="fas fa-times-circle"></i>
+                    </a>
+                </span>
+                {% endif %}
+                
+                {% if date_from %}
+                <span class="badge bg-secondary me-2 mb-1">
+                    De: {{ date_from }}
+                    <a href="{% url 'administracao:reservas_lista' %}" class="text-white ms-1">
+                        <i class="fas fa-times-circle"></i>
+                    </a>
+                </span>
+                {% endif %}
+                
+                {% if date_to %}
+                <span class="badge bg-secondary me-2 mb-1">
+                    Até: {{ date_to }}
+                    <a href="{% url 'administracao:reservas_lista' %}" class="text-white ms-1">
+                        <i class="fas fa-times-circle"></i>
+                    </a>
+                </span>
+                {% endif %}
+                
+                <a href="{% url 'administracao:reservas_lista' %}" class="btn btn-sm btn-outline-secondary mb-1">
+                    <i class="fas fa-times me-1"></i>Limpar Filtros
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Estatísticas Rápidas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ reservas|length }}</h4>
+                            <small>Total de Reservas</small>
+                        </div>
+                        <i class="fas fa-ticket-alt fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ reservas|length }}</h4>
+                            <small>Confirmadas</small>
+                        </div>
+                        <i class="fas fa-check-circle fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>0</h4>
+                            <small>Pendentes</small>
+                        </div>
+                        <i class="fas fa-clock fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>0</h4>
+                            <small>Canceladas</small>
+                        </div>
+                        <i class="fas fa-times-circle fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Reservas -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr class="bg-dark text-white">
+                            <th colspan="8" class="ps-3">
+                                Reservas de Ingressos
+                                <a href="" class="float-end text-success me-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Imprimir Lista de Reservas">
+                                    <i class="fas fa-print"></i>
+                                </a>
+                            </th>
+                        </tr>
+                        <tr class="bg-success text-white">
+                            <th scope="col" class="ps-3">#ID</th>
+                            <th scope="col">Usuário</th>
+                            <th scope="col">Filme</th>
+                            <th scope="col">Sessão</th>
+                            <th scope="col">Assentos</th>
+                            <th scope="col">Preço Total</th>
+                            <th scope="col">Status</th>
+                            <th scope="col" class="text-end pe-3">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reserva in reservas %}
+                        <tr>
+                            <td class="ps-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-success text-white rounded-circle me-2 d-flex align-items-center justify-content-center" 
+                                         style="width: 35px; height: 35px; font-size: 12px;">
+                                        #{{ reserva.id }}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <div class="fw-bold">{{ reserva.user.get_full_name_display }}</div>
+                                    <small class="text-muted">{{ reserva.user.email }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <div class="fw-bold">Filme ID: {{ reserva.movie_id }}</div>
+                                    <small class="text-muted">TMDB</small>
+                                </div>
+                            </td>
+                            <td>{{ reserva.session|truncatechars:30 }}</td>
+                            <td>
+                                <span class="badge bg-info">
+                                    {{ reserva.seats|truncatechars:20 }}
+                                </span>
+                            </td>
+                            <td>
+                                <strong class="text-success">{{ reserva.total_price|floatformat:2 }} Kz</strong>
+                            </td>
+                            <td>
+                                {{ reserva.status }}
+                                {% comment %}
+                                <select class="form-select form-select-sm status-select" 
+                                        data-reserva-id="{{ reserva.id }}"
+                                        style="width: auto;">
+                                    {% for status_key, status_label in status_choices %}
+                                    <option value="{{ status_key }}" 
+                                            {% if status_key == reserva.status %}selected{% endif %}>
+                                        {{ status_label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                {% endcomment %}
+                            </td>
+                            <td class="text-end pe-3">
+                                <div class="btn-group">
+                                    <a href="{% url 'administracao:reserva_detalhe' pk=reserva.pk %}" 
+                                       class="btn btn-sm btn-outline-success"
+                                       data-bs-toggle="tooltip"
+                                       data-bs-placement="top"
+                                       title="Ver detalhes da reserva">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% comment %}
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-primary"
+                                            onclick="printTicket('{{ reserva.id }}')"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-placement="top"
+                                            title="Imprimir ingresso">
+                                        <i class="fas fa-print"></i>
+                                    </button>
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-danger"
+                                            onclick="confirmCancellation('{{ reserva.id }}', '{{ reserva.user.get_full_name_display }}')"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-placement="top"
+                                            title="Cancelar reserva"
+                                            {% if not reserva.can_be_cancelled %}disabled{% endif %}>
+                                        <i class="fas fa-ban"></i>
+                                    </button>
+                                    {% endcomment %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4">
+                                <div class="text-muted">
+                                    <i class="fas fa-ticket-alt fa-2x mb-3"></i>
+                                    <p>
+                                        {% if search_query %}
+                                            Nenhuma reserva encontrada para "{{ search_query }}".
+                                            <a href="{% url 'administracao:reservas_lista' %}" class="btn btn-sm btn-outline-secondary ml-2">
+                                                Limpar pesquisa
+                                            </a>
+                                        {% else %}
+                                            Nenhuma reserva cadastrada.
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paginação -->
+    {% if is_paginated %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link text-success" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.user_id %}&user_id={{ request.GET.user_id }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <li class="page-item active">
+                <span class="page-link bg-success border-success">{{ num }}</span>
+            </li>
+            {% else %}
+            <li class="page-item">
+                <a class="page-link text-success" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.user_id %}&user_id={{ request.GET.user_id }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">{{ num }}</a>
+            </li>
+            {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link text-success" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.user_id %}&user_id={{ request.GET.user_id }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block scriptJS %}
+<script>
+    
+</script>
+{% endblock %}

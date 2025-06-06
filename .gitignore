@@ -1,0 +1,49 @@
+# Arquivos Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Arquivos de ambiente
+.env
+*.env
+.env.*
+
+# Arquivos de log
+*.log
+
+# Arquivos temporários/swap
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Arquivos do sistema operacional e editores
+.vscode/
+.idea/
+*.bak
+
+# Arquivos de build
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Arquivos do pip
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Configurações do PyCharm
+*.iml
+*.ipr
+*.iws
+*.sublime-project
+*.sublime-workspace
+
+# Cache de dependências
+.venv/
+venv/
+ENV/
+env/

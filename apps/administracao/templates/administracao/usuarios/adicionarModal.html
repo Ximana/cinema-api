@@ -1,0 +1,191 @@
+<!-- apps/administracao/templates/administracao/usuarios/AdicionarModal.html -->
+<div
+  class="modal fade"
+  id="modalAdicionarUsuario"
+  tabindex="-1"
+  aria-labelledby="modalAdicionarUsuarioLabel"
+  aria-hidden="true"
+  data-bs-backdrop="static"
+>
+  <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalAdicionarUsuarioLabel">
+          Adicionar Novo Usuário
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form class="row" method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          
+          <div class="col-md-6">
+            <!-- Dados Pessoais -->
+            <div class="form-group mb-3">
+              <label for="username">Nome de Usuário *</label>
+              <input
+                type="text"
+                class="form-control {% if form.username.errors %}is-invalid{% endif %}"
+                id="username"
+                name="username"
+                value="{{ form.username.value|default:'' }}"
+                required
+              />
+              {% if form.username.errors %}
+                <div class="invalid-feedback">{{ form.username.errors|first }}</div>
+              {% endif %}
+            </div>
+
+            <div class="form-group mb-3">
+              <label for="full_name">Nome Completo *</label>
+              <input
+                type="text"
+                class="form-control {% if form.full_name.errors %}is-invalid{% endif %}"
+                id="full_name"
+                name="full_name"
+                value="{{ form.full_name.value|default:'' }}"
+                required
+              />
+              {% if form.full_name.errors %}
+                <div class="invalid-feedback">{{ form.full_name.errors|first }}</div>
+              {% endif %}
+            </div>
+
+            <div class="form-group mb-3">
+              <label for="email">E-mail *</label>
+              <input
+                type="email"
+                class="form-control {% if form.email.errors %}is-invalid{% endif %}"
+                id="email"
+                name="email"
+                value="{{ form.email.value|default:'' }}"
+                required
+              />
+              {% if form.email.errors %}
+                <div class="invalid-feedback">{{ form.email.errors|first }}</div>
+              {% endif %}
+            </div>
+
+            <div class="form-group mb-3">
+              <label for="identification_number">Número de Identificação *</label>
+              <input
+                type="text"
+                class="form-control {% if form.identification_number.errors %}is-invalid{% endif %}"
+                id="identification_number"
+                name="identification_number"
+                value="{{ form.identification_number.value|default:'' }}"
+                placeholder="BI, NIF, etc."
+                required
+              />
+              {% if form.identification_number.errors %}
+                <div class="invalid-feedback">{{ form.identification_number.errors|first }}</div>
+              {% endif %}
+              <div class="form-text">
+                <small>BI, NIF, etc.</small>
+              </div>
+            </div>
+
+            <div class="form-group mb-3">
+              <label for="user_type">Tipo de Usuário *</label>
+              <select 
+                class="form-select {% if form.user_type.errors %}is-invalid{% endif %}" 
+                id="user_type" 
+                name="user_type"
+                required
+              >
+                <option value="">Selecione um tipo...</option>
+                {% for value, label in form.fields.user_type.choices %}
+                  <option value="{{ value }}" {% if form.user_type.value == value %}selected{% endif %}>
+                    {{ label }}
+                  </option>
+                {% endfor %}
+              </select>
+              {% if form.user_type.errors %}
+                <div class="invalid-feedback">{{ form.user_type.errors|first }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="row">
+              <div class="col-12 form-group mb-3">
+                <label for="date_of_birth">Data de Nascimento</label>
+                <input
+                  type="date"
+                  class="form-control {% if form.date_of_birth.errors %}is-invalid{% endif %}"
+                  id="date_of_birth"
+                  name="date_of_birth"
+                  value="{{ form.date_of_birth.value|default:'' }}"
+                />
+                {% if form.date_of_birth.errors %}
+                  <div class="invalid-feedback">{{ form.date_of_birth.errors|first }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-12 form-group mb-3">
+                <label for="password1">Senha *</label>
+                <input
+                  type="password"
+                  class="form-control {% if form.password1.errors %}is-invalid{% endif %}"
+                  id="password1"
+                  name="password1"
+                  required
+                />
+                {% if form.password1.errors %}
+                  <div class="invalid-feedback">{{ form.password1.errors|first }}</div>
+                {% endif %}
+                <div class="form-text">
+                  <small>A senha deve ter pelo menos 8 caracteres e não pode ser muito comum.</small>
+                </div>
+              </div>
+
+              <div class="col-12 form-group mb-3">
+                <label for="password2">Confirmar Senha *</label>
+                <input
+                  type="password"
+                  class="form-control {% if form.password2.errors %}is-invalid{% endif %}"
+                  id="password2"
+                  name="password2"
+                  required
+                />
+                {% if form.password2.errors %}
+                  <div class="invalid-feedback">{{ form.password2.errors|first }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <!-- Exibir erros não relacionados a campos específicos -->
+          {% if form.non_field_errors %}
+            <div class="col-12">
+              <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}
+                  <p class="mb-0">{{ error }}</p>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+          <div class="modal-footer mt-3">
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              data-bs-dismiss="modal"
+            >
+              Fechar
+            </button>
+            <button type="submit" class="btn btn-success btn-sm">
+              <i class="fas fa-user-plus me-1"></i>
+              Adicionar Usuário
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
