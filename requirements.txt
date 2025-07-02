@@ -1,6 +1,27 @@
-Django>=4.0,<5.0
-djangorestframework>=3.14.0
-pillow>=9.0.0  # Para manipulação de imagens (ImageField)
-python-decouple>=3.8  # Para gerenciar variáveis de ambiente
 markdown>=3.5  # Para formatação de saída da API em navegadores
-django-filter>=23.2  # Para filtrar resultados da API
+# Django principal
+Django==5.1.5
+
+# REST API
+djangorestframework==3.16.0
+django-filter==25.1
+
+# PostgreSQL (Neon)
+psycopg2-binary==2.9.10
+dj-database-url==3.0.0
+
+# Variáveis de ambiente (configurações seguras)
+python-decouple==3.8
+
+# Gunicorn para deploy em produção (Render)
+gunicorn==22.0.0
+
+# WhiteNoise para servir arquivos estáticos
+whitenoise==6.6.0
+
+# Forms e UI
+django-crispy-forms==2.3
+crispy-bootstrap5==2024.10
+
+# HTTP requests (caso uses APIs externas)
+requests==2.32.3
